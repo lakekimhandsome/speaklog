@@ -10,10 +10,10 @@ const SpeakLogData = {
     name: "SpeakLog",
     tagline: "1:1 온라인 영어회화",
     url: "https://speaklog.co.kr",
-    phone: "010-0000-0000",
-    phoneDisplay: "010-0000-0000",
-    kakaoUrl: "https://pf.kakao.com/_placeholder",
-    instagramUrl: "https://instagram.com/speaklog",
+    phone: "010-5647-2912",
+    phoneDisplay: "010-5647-2912",
+    kakaoUrl: "http://pf.kakao.com/_NxhqPX/friend",
+    instagramUrl: "https://www.instagram.com/speaklog_official?igsh=MW5pdDVkdWYwNG93Mw%3D%3D&utm_source=qr",
     businessHours: "평일 09:00 – 21:00 · 토요일 10:00 – 17:00",
   },
 
@@ -60,7 +60,7 @@ const SpeakLogData = {
     description: "지금 상담 신청 시 첫 달 특별 혜택을 드립니다",
   },
 
-  /** @type {Review[]} — 빈 배열이면 Coming Soon 카드 표시 */
+  /** @type {Review[]} — DB/API 후기. 게스트 후기는 reviews.js(localStorage) */
   reviews: [],
 
   /** @type {Notice[]} — 향후 공지사항 배너/섹션용 */

@@ -126,9 +126,40 @@
       .join("");
   }
 
-  function renderReviews(reviews) {
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function getAllReviews(staticReviews) {
+    const guestReviews = SpeakLogReviews.loadGuestReviews();
+    return SpeakLogReviews.mergeReviews(staticReviews, guestReviews);
+  }
+
+  function renderReviewCards(reviews) {
+    return reviews
+      .map(
+        (review) => `
+      <article class="review-card">
+        <div class="review-stars" aria-label="별점 ${review.rating}점">
+          ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}
+        </div>
+        <blockquote class="review-text">${escapeHtml(review.content)}</blockquote>
+        <footer class="review-author">
+          <strong>${escapeHtml(review.author)}</strong>
+          ${review.role ? `<span>${escapeHtml(review.role)}</span>` : ""}
+        </footer>
+      </article>`
+      )
+      .join("");
+  }
+
+  function renderReviews(staticReviews) {
     const grid = $("#reviews-grid");
     if (!grid) return;
+
+    const reviews = getAllReviews(staticReviews);
 
     if (!reviews.length) {
       grid.innerHTML = `
@@ -138,27 +169,81 @@
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
             </svg>
           </div>
-          <p class="review-placeholder-title">Coming Soon</p>
-          <p class="review-placeholder-desc">수강생 후기를 준비 중입니다. 곧 만나보실 수 있어요!</p>
+          <p class="review-placeholder-title">첫 후기를 남겨보세요</p>
+          <p class="review-placeholder-desc">수강 경험을 공유해 주시면 다른 분들께 큰 도움이 됩니다</p>
         </div>`;
       return;
     }
 
-    grid.innerHTML = reviews
-      .map(
-        (review) => `
-      <article class="review-card">
-        <div class="review-stars" aria-label="별점 ${review.rating}점">
-          ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}
-        </div>
-        <blockquote class="review-text">${review.content}</blockquote>
-        <footer class="review-author">
-          <strong>${review.author}</strong>
-          ${review.role ? `<span>${review.role}</span>` : ""}
-        </footer>
-      </article>`
-      )
-      .join("");
+    grid.innerHTML = renderReviewCards(reviews);
+  }
+
+  function initReviewForm(staticReviews) {
+    const form = $("#review-form");
+    const status = $("#review-form-status");
+    const ratingInput = $("#review-rating");
+    const starButtons = document.querySelectorAll(".star-btn");
+    if (!form || !ratingInput) return;
+
+    let selectedRating = 0;
+
+    function updateStars(value) {
+      selectedRating = value;
+      ratingInput.value = String(value);
+      starButtons.forEach((btn) => {
+        const starValue = Number(btn.dataset.value);
+        btn.classList.toggle("is-active", starValue <= value);
+        btn.setAttribute("aria-checked", String(starValue === value));
+      });
+    }
+
+    starButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        updateStars(Number(btn.dataset.value));
+      });
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const author = form.author.value.trim();
+      const role = form.role.value.trim();
+      const content = form.content.value.trim();
+      const rating = Number(ratingInput.value);
+
+      if (!author) {
+        status.textContent = "이름을 입력해 주세요.";
+        status.className = "form-note form-note--error";
+        return;
+      }
+
+      if (!rating) {
+        status.textContent = "별점을 선택해 주세요.";
+        status.className = "form-note form-note--error";
+        return;
+      }
+
+      if (content.length < 10) {
+        status.textContent = "후기는 10자 이상 작성해 주세요.";
+        status.className = "form-note form-note--error";
+        return;
+      }
+
+      const review = SpeakLogReviews.createGuestReview({
+        author,
+        role,
+        rating,
+        content,
+      });
+
+      SpeakLogReviews.saveGuestReview(review);
+      renderReviews(staticReviews);
+
+      status.textContent = "후기가 등록되었습니다. 감사합니다!";
+      status.className = "form-note form-note--success";
+      form.reset();
+      updateStars(0);
+    });
   }
 
   function renderNotices(notices) {
@@ -227,25 +312,34 @@
     const toggle = $("#nav-toggle");
     const navLinks = $("#nav-links");
 
+    function setNavOpen(open) {
+      navLinks.classList.toggle("is-open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "메뉴 닫기" : "메뉴 열기");
+      document.body.classList.toggle("nav-open", open);
+    }
+
     window.addEventListener("scroll", () => {
       header.classList.toggle("scrolled", window.scrollY > 20);
     }, { passive: true });
 
     if (toggle && navLinks) {
       toggle.addEventListener("click", () => {
-        const open = navLinks.classList.toggle("is-open");
-        toggle.setAttribute("aria-expanded", String(open));
-        toggle.setAttribute("aria-label", open ? "메뉴 닫기" : "메뉴 열기");
-        document.body.classList.toggle("nav-open", open);
+        setNavOpen(!navLinks.classList.contains("is-open"));
       });
 
       navLinks.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", () => {
-          navLinks.classList.remove("is-open");
-          toggle.setAttribute("aria-expanded", "false");
-          toggle.setAttribute("aria-label", "메뉴 열기");
-          document.body.classList.remove("nav-open");
-        });
+        link.addEventListener("click", () => setNavOpen(false));
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setNavOpen(false);
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!navLinks.classList.contains("is-open")) return;
+        if (navLinks.contains(e.target) || toggle.contains(e.target)) return;
+        setNavOpen(false);
       });
     }
   }
@@ -331,6 +425,7 @@
     renderReviews(reviews);
     renderNotices(notices);
     renderFaq(faq);
+    initReviewForm(reviews);
     initNavigation();
     initStickyCta();
     initContactForm();
