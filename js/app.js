@@ -310,12 +310,20 @@
   function initNavigation() {
     const header = $("#header");
     const toggle = $("#nav-toggle");
+    const drawer = $("#nav-drawer");
+    const overlay = $("#nav-overlay");
     const navLinks = $("#nav-links");
 
     function setNavOpen(open) {
-      navLinks.classList.toggle("is-open", open);
-      toggle.setAttribute("aria-expanded", String(open));
-      toggle.setAttribute("aria-label", open ? "메뉴 닫기" : "메뉴 열기");
+      if (drawer) drawer.classList.toggle("is-open", open);
+      if (overlay) {
+        overlay.classList.toggle("is-open", open);
+        overlay.setAttribute("aria-hidden", String(!open));
+      }
+      if (toggle) {
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.setAttribute("aria-label", open ? "메뉴 닫기" : "메뉴 열기");
+      }
       document.body.classList.toggle("nav-open", open);
     }
 
@@ -323,23 +331,23 @@
       header.classList.toggle("scrolled", window.scrollY > 20);
     }, { passive: true });
 
-    if (toggle && navLinks) {
+    if (toggle && drawer) {
       toggle.addEventListener("click", () => {
-        setNavOpen(!navLinks.classList.contains("is-open"));
+        setNavOpen(!drawer.classList.contains("is-open"));
       });
 
-      navLinks.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", () => setNavOpen(false));
-      });
+      if (overlay) {
+        overlay.addEventListener("click", () => setNavOpen(false));
+      }
+
+      if (navLinks) {
+        navLinks.querySelectorAll("a").forEach((link) => {
+          link.addEventListener("click", () => setNavOpen(false));
+        });
+      }
 
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") setNavOpen(false);
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!navLinks.classList.contains("is-open")) return;
-        if (navLinks.contains(e.target) || toggle.contains(e.target)) return;
-        setNavOpen(false);
       });
     }
   }
