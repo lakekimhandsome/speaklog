@@ -249,8 +249,8 @@ img { max-width: 100%; display: block; height: auto; }
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.48) 50%, rgba(238, 244, 255, 0.52) 100%),
-    linear-gradient(135deg, rgba(255, 240, 245, 0.18) 0%, transparent 55%, rgba(238, 249, 255, 0.15) 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.62) 50%, rgba(238, 244, 255, 0.66) 100%),
+    linear-gradient(135deg, rgba(255, 240, 245, 0.22) 0%, transparent 55%, rgba(238, 249, 255, 0.18) 100%);
 }
 
 .hero-inner {
