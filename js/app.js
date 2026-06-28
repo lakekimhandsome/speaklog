@@ -310,12 +310,11 @@
   function initNavigation() {
     const header = $("#header");
     const toggle = $("#nav-toggle");
-    const drawer = $("#nav-drawer");
     const overlay = $("#nav-overlay");
     const navLinks = $("#nav-links");
 
     function setNavOpen(open) {
-      if (drawer) drawer.classList.toggle("is-open", open);
+      if (navLinks) navLinks.classList.toggle("is-open", open);
       if (overlay) {
         overlay.classList.toggle("is-open", open);
         overlay.setAttribute("aria-hidden", String(!open));
@@ -331,20 +330,18 @@
       header.classList.toggle("scrolled", window.scrollY > 20);
     }, { passive: true });
 
-    if (toggle && drawer) {
+    if (toggle && navLinks) {
       toggle.addEventListener("click", () => {
-        setNavOpen(!drawer.classList.contains("is-open"));
+        setNavOpen(!navLinks.classList.contains("is-open"));
       });
 
       if (overlay) {
         overlay.addEventListener("click", () => setNavOpen(false));
       }
 
-      if (navLinks) {
-        navLinks.querySelectorAll("a").forEach((link) => {
-          link.addEventListener("click", () => setNavOpen(false));
-        });
-      }
+      navLinks.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => setNavOpen(false));
+      });
 
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") setNavOpen(false);
