@@ -1,9 +1,8 @@
 /**
  * SpeakLog 정적 데이터
  * ─────────────────────────────────────────────
- * 추후 Supabase 등 DB 연결 시 이 파일의 fetch 로직만
- * api/pricing.js, api/reviews.js, api/notices.js 등으로
- * 교체하면 됩니다. UI 렌더링 코드는 app.js에 분리되어 있습니다.
+ * 후기·공지·상담 신청은 Supabase(api.js)에서 조회·저장합니다.
+ * 이 파일은 사이트 정적 콘텐츠(수강료, FAQ 등)만 담습니다.
  */
 const SpeakLogData = {
   site: {
@@ -16,6 +15,18 @@ const SpeakLogData = {
     instagramUrl: "https://www.instagram.com/speaklog_official?igsh=MW5pdDVkdWYwNG93Mw%3D%3D&utm_source=qr",
     businessHours: "평일 09:00 – 21:00 · 토요일 10:00 – 17:00",
   },
+
+  /** 학습 목표(상담 신청) / 수강 유형(후기) 공통 옵션 */
+  learnerTypes: [
+    { value: "work", label: "직장인 회화" },
+    { value: "elementary", label: "초등학생" },
+    { value: "middle", label: "중학생" },
+    { value: "high", label: "고등학생" },
+    { value: "student", label: "대학생 / 취업 준비" },
+    { value: "travel", label: "여행 영어" },
+    { value: "beginner", label: "영어회화 초보" },
+    { value: "other", label: "기타" },
+  ],
 
   /** @type {PricingPlan[]} */
   pricing: [
@@ -59,12 +70,6 @@ const SpeakLogData = {
     label: "오픈 이벤트",
     description: "지금 상담 신청 시 첫 달 특별 혜택을 드립니다",
   },
-
-  /** @type {Review[]} — DB/API 후기. 게스트 후기는 reviews.js(localStorage) */
-  reviews: [],
-
-  /** @type {Notice[]} — 향후 공지사항 배너/섹션용 */
-  notices: [],
 
   /** @type {FaqItem[]} */
   faq: [
@@ -133,10 +138,11 @@ const SpeakLogData = {
 
   audiences: [
     { id: "audience-1", icon: "briefcase", label: "직장인", color: "navy" },
-    { id: "audience-2", icon: "graduation", label: "대학생", color: "purple" },
-    { id: "audience-3", icon: "target", label: "취업 준비생", color: "pink" },
-    { id: "audience-4", icon: "plane", label: "여행 영어", color: "orange" },
-    { id: "audience-5", icon: "seedling", label: "영어회화 초보", color: "teal" },
+    { id: "audience-2", icon: "book-open", label: "학생", color: "sky" },
+    { id: "audience-3", icon: "graduation", label: "대학생", color: "purple" },
+    { id: "audience-4", icon: "target", label: "취업 준비생", color: "pink" },
+    { id: "audience-5", icon: "plane", label: "여행 영어", color: "orange" },
+    { id: "audience-6", icon: "seedling", label: "영어회화 초보", color: "teal" },
   ],
 
   process: [

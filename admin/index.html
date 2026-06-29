@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>SpeakLog 관리자</title>
+  <link rel="icon" href="../favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <img src="../images/logo.png" alt="SpeakLog" width="120" height="42" class="login-logo">
+      <h1 class="login-title">관리자 로그인</h1>
+      <p class="login-desc">Supabase Authentication 계정으로 로그인하세요</p>
+      <form id="login-form" class="login-form" novalidate>
+        <div class="form-group">
+          <label for="login-email">이메일</label>
+          <input type="email" id="login-email" name="email" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="login-password">비밀번호</label>
+          <input type="password" id="login-password" name="password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">로그인</button>
+        <p class="form-note" id="login-status" role="status" aria-live="polite"></p>
+      </form>
+      <a href="../index.html" class="login-back">← 사이트로 돌아가기</a>
+    </div>
+  </div>
+
+  <div id="admin-app" class="admin-app" hidden>
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div class="admin-brand">
+          <img src="../images/logo.png" alt="SpeakLog" width="100" height="36">
+          <span class="admin-badge">Admin</span>
+        </div>
+        <div class="admin-header-actions">
+          <span class="admin-user" id="admin-user-email"></span>
+          <button type="button" class="btn btn-outline btn-sm" id="logout-btn">로그아웃</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="admin-layout">
+      <nav class="admin-nav" aria-label="관리 메뉴">
+        <button type="button" class="admin-nav-btn is-active" data-panel="consultations">
+          상담 신청
+          <span class="admin-nav-count" id="consultations-count"></span>
+        </button>
+        <button type="button" class="admin-nav-btn" data-panel="reviews">후기 관리</button>
+        <button type="button" class="admin-nav-btn" data-panel="notices">공지사항</button>
+      </nav>
+
+      <main class="admin-main">
+        <section class="admin-panel is-active" id="panel-consultations">
+          <header class="admin-panel-header">
+            <h2>상담 신청</h2>
+            <button type="button" class="btn btn-outline btn-sm" id="refresh-consultations">새로고침</button>
+          </header>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>접수일</th>
+                  <th>이름</th>
+                  <th>연락처</th>
+                  <th>이메일</th>
+                  <th>학습 목표</th>
+                  <th>문의</th>
+                  <th>상태</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="consultations-tbody"></tbody>
+            </table>
+            <p class="admin-empty" id="consultations-empty" hidden>접수된 상담 신청이 없습니다.</p>
+          </div>
+        </section>
+
+        <section class="admin-panel" id="panel-reviews">
+          <header class="admin-panel-header">
+            <h2>후기 관리</h2>
+            <button type="button" class="btn btn-outline btn-sm" id="refresh-reviews">새로고침</button>
+          </header>
+          <div class="admin-cards" id="reviews-list"></div>
+          <p class="admin-empty" id="reviews-empty" hidden>등록된 후기가 없습니다.</p>
+        </section>
+
+        <section class="admin-panel" id="panel-notices">
+          <header class="admin-panel-header">
+            <h2>공지사항</h2>
+            <button type="button" class="btn btn-primary btn-sm" id="add-notice-btn">공지 추가</button>
+          </header>
+
+          <form class="admin-form" id="notice-form" hidden>
+            <input type="hidden" id="notice-id" value="">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="notice-title">제목 <span class="required">*</span></label>
+                <input type="text" id="notice-title" required maxlength="100">
+              </div>
+              <div class="form-group">
+                <label for="notice-date">게시일</label>
+                <input type="date" id="notice-date">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="notice-link">링크 (선택)</label>
+              <input type="url" id="notice-link" placeholder="https:// 또는 #contact">
+            </div>
+            <div class="form-group">
+              <label for="notice-content">내용 (선택, 관리용 메모)</label>
+              <textarea id="notice-content" rows="2"></textarea>
+            </div>
+            <div class="form-row form-row--checkboxes">
+              <label class="checkbox-label">
+                <input type="checkbox" id="notice-pinned">
+                <span>상단 고정</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="notice-published" checked>
+                <span>게시</span>
+              </label>
+            </div>
+            <div class="admin-form-actions">
+              <button type="submit" class="btn btn-primary btn-sm">저장</button>
+              <button type="button" class="btn btn-outline btn-sm" id="cancel-notice-btn">취소</button>
+            </div>
+            <p class="form-note" id="notice-form-status" role="status"></p>
+          </form>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>게시일</th>
+                  <th>제목</th>
+                  <th>고정</th>
+                  <th>게시</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="notices-tbody"></tbody>
+            </table>
+            <p class="admin-empty" id="notices-empty" hidden>등록된 공지사항이 없습니다.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="admin.js"></script>
+</body>
+
+</html>

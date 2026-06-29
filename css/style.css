@@ -394,7 +394,7 @@ img { max-width: 100%; display: block; height: auto; }
 .feature-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
 .feature-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
 
-.audience-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.audience-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
 
 .audience-item {
   display: flex;
@@ -429,6 +429,7 @@ img { max-width: 100%; display: block; height: auto; }
 .audience-item--pink .audience-icon { background: var(--pink-soft); color: var(--pink); }
 .audience-item--orange .audience-icon { background: var(--orange-soft); color: var(--orange); }
 .audience-item--teal .audience-icon { background: var(--teal-soft); color: var(--teal); }
+.audience-item--sky .audience-icon { background: var(--sky-soft); color: var(--sky); }
 .audience-label { font-size: 0.95rem; font-weight: 600; color: var(--text); text-align: center; }
 
 .timeline { max-width: 480px; margin: 0 auto; }

@@ -202,11 +202,6 @@
                 <label for="review-role">수강 유형</label>
                 <select id="review-role" name="role">
                   <option value="">선택해 주세요</option>
-                  <option value="직장인">직장인</option>
-                  <option value="대학생">대학생</option>
-                  <option value="취업 준비생">취업 준비생</option>
-                  <option value="여행 영어">여행 영어</option>
-                  <option value="영어회화 초보">영어회화 초보</option>
                 </select>
               </div>
               <div class="form-group">
@@ -232,7 +227,7 @@
       </div>
     </section>
 
-    <!-- 공지사항 (향후 DB 연동) -->
+    <!-- 공지사항 -->
     <div id="notices-container" class="notices-container" hidden></div>
 
     <!-- 7. FAQ -->
@@ -281,11 +276,6 @@
               <label for="goal">학습 목표</label>
               <select id="goal" name="goal">
                 <option value="">선택해 주세요</option>
-                <option value="work">직장인 회화</option>
-                <option value="student">대학생 / 취업 준비</option>
-                <option value="travel">여행 영어</option>
-                <option value="beginner">영어회화 초보</option>
-                <option value="other">기타</option>
               </select>
             </div>
             <div class="form-group">
@@ -382,6 +372,10 @@
     <a href="#" class="btn btn-kakao btn-sm" id="sticky-kakao-btn" target="_blank" rel="noopener noreferrer">카카오톡</a>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/data.js"></script>
   <script src="js/reviews.js"></script>
   <script src="js/app.js"></script>

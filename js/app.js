@@ -1,7 +1,5 @@
 /**
  * SpeakLog UI 렌더링 & 인터랙션
- * data.js의 데이터를 DOM에 반영합니다.
- * DB 연동 시: init() 시작 부분에서 fetch 후 SpeakLogData를 갱신하면 됩니다.
  */
 (function () {
   "use strict";
@@ -12,6 +10,7 @@
     calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
     video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
     briefcase: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>`,
+    "book-open": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>`,
     graduation: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg>`,
     target: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
     plane: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>`,
@@ -132,9 +131,22 @@
     return div.innerHTML;
   }
 
-  function getAllReviews(staticReviews) {
-    const guestReviews = SpeakLogReviews.loadGuestReviews();
-    return SpeakLogReviews.mergeReviews(staticReviews, guestReviews);
+  function getLearnerTypeLabel(value) {
+    if (!value) return "";
+    const match = SpeakLogData.learnerTypes.find((item) => item.value === value);
+    return match ? match.label : value;
+  }
+
+  function populateLearnerTypeSelects() {
+    const options = SpeakLogData.learnerTypes
+      .map((item) => `<option value="${item.value}">${item.label}</option>`)
+      .join("");
+
+    ["#goal", "#review-role"].forEach((selector) => {
+      const select = $(selector);
+      if (!select) return;
+      select.innerHTML = `<option value="">선택해 주세요</option>${options}`;
+    });
   }
 
   function renderReviewCards(reviews) {
@@ -148,18 +160,16 @@
         <blockquote class="review-text">${escapeHtml(review.content)}</blockquote>
         <footer class="review-author">
           <strong>${escapeHtml(review.author)}</strong>
-          ${review.role ? `<span>${escapeHtml(review.role)}</span>` : ""}
+          ${review.role ? `<span>${escapeHtml(getLearnerTypeLabel(review.role))}</span>` : ""}
         </footer>
       </article>`
       )
       .join("");
   }
 
-  function renderReviews(staticReviews) {
+  function renderReviews(reviews) {
     const grid = $("#reviews-grid");
     if (!grid) return;
-
-    const reviews = getAllReviews(staticReviews);
 
     if (!reviews.length) {
       grid.innerHTML = `
@@ -178,11 +188,12 @@
     grid.innerHTML = renderReviewCards(reviews);
   }
 
-  function initReviewForm(staticReviews) {
+  function initReviewForm() {
     const form = $("#review-form");
     const status = $("#review-form-status");
     const ratingInput = $("#review-rating");
     const starButtons = document.querySelectorAll(".star-btn");
+    const submitBtn = form?.querySelector('button[type="submit"]');
     if (!form || !ratingInput) return;
 
     let selectedRating = 0;
@@ -203,7 +214,7 @@
       });
     });
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const author = form.author.value.trim();
@@ -229,20 +240,38 @@
         return;
       }
 
-      const review = SpeakLogReviews.createGuestReview({
-        author,
-        role,
-        rating,
-        content,
-      });
+      if (!SpeakLogSupabase.isConfigured()) {
+        status.textContent = "서비스 설정이 완료되지 않았습니다. 잠시 후 다시 시도해 주세요.";
+        status.className = "form-note form-note--error";
+        return;
+      }
 
-      SpeakLogReviews.saveGuestReview(review);
-      renderReviews(staticReviews);
+      if (submitBtn) submitBtn.disabled = true;
+      status.textContent = "등록 중…";
+      status.className = "form-note";
 
-      status.textContent = "후기가 등록되었습니다. 감사합니다!";
-      status.className = "form-note form-note--success";
-      form.reset();
-      updateStars(0);
+      try {
+        await SpeakLogReviews.saveReview({ author, role, rating, content });
+        const reviews = await SpeakLogReviews.loadReviews();
+        renderReviews(reviews);
+
+        status.textContent = "후기가 등록되었습니다. 감사합니다!";
+        status.className = "form-note form-note--success";
+        form.reset();
+        updateStars(0);
+      } catch (err) {
+        console.error("[SpeakLog] 후기 등록 실패:", err?.message || err, err?.code || "");
+        if (err?.code === "PGRST204" || err?.code === "42703") {
+          status.textContent = "후기 데이터베이스 설정이 필요합니다. 관리자에게 문의해 주세요.";
+        } else if (err?.code === "42501") {
+          status.textContent = "후기 등록 권한 오류입니다. 잠시 후 다시 시도해 주세요.";
+        } else {
+          status.textContent = "후기 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+        }
+        status.className = "form-note form-note--error";
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
     });
   }
 
@@ -259,7 +288,7 @@
               (notice) => `
             <a href="${notice.link || "#"}" class="notice-item${notice.pinned ? " notice-item--pinned" : ""}">
               ${notice.pinned ? '<span class="notice-badge">공지</span>' : ""}
-              <span class="notice-title">${notice.title}</span>
+              <span class="notice-title">${escapeHtml(notice.title)}</span>
               <time class="notice-date" datetime="${notice.date}">${notice.dateLabel || notice.date}</time>
             </a>`
             )
@@ -368,13 +397,17 @@
   function initContactForm() {
     const form = $("#contact-form");
     const status = $("#form-status");
+    const submitBtn = form?.querySelector('button[type="submit"]');
     if (!form) return;
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const name = form.name.value.trim();
       const phone = form.phone.value.trim();
+      const email = form.email.value.trim();
+      const goal = form.goal.value.trim();
+      const message = form.message.value.trim();
       const privacy = form.privacy.checked;
 
       if (!name || !phone) {
@@ -389,10 +422,36 @@
         return;
       }
 
-      /* MVP: 실제 전송 대신 성공 메시지 표시. DB/API 연동 시 fetch로 교체 */
-      status.textContent = "상담 신청이 접수되었습니다. 빠른 시일 내에 연락드리겠습니다!";
-      status.className = "form-note form-note--success";
-      form.reset();
+      if (!SpeakLogSupabase.isConfigured()) {
+        status.textContent = "서비스 설정이 완료되지 않았습니다. 잠시 후 다시 시도해 주세요.";
+        status.className = "form-note form-note--error";
+        return;
+      }
+
+      if (submitBtn) submitBtn.disabled = true;
+      status.textContent = "접수 중…";
+      status.className = "form-note";
+
+      try {
+        await SpeakLogAPI.submitConsultation({ name, phone, email, goal, message });
+        status.textContent = "상담 신청이 접수되었습니다. 빠른 시일 내에 연락드리겠습니다!";
+        status.className = "form-note form-note--success";
+        form.reset();
+      } catch (err) {
+        console.error("[SpeakLog] 상담 신청 실패:", err?.message || err, err?.code || "");
+        if (err?.code === "PGRST205") {
+          status.textContent = "데이터베이스 테이블이 없습니다. Supabase SQL Editor에서 schema.sql을 실행해 주세요.";
+        } else if (err?.message?.includes("Invalid API key")) {
+          status.textContent = "Supabase API 키가 올바르지 않습니다. config.js의 키를 다시 확인해 주세요.";
+        } else if (err?.code === "42501") {
+          status.textContent = "접수 권한 오류입니다. 카카오톡으로 문의해 주세요.";
+        } else {
+          status.textContent = "상담 신청 접수에 실패했습니다. 카카오톡으로 문의해 주세요.";
+        }
+        status.className = "form-note form-note--error";
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
     });
   }
 
@@ -416,25 +475,40 @@
     });
   }
 
-  function init() {
-    const { site, pricing, pricingEvent, reviews, notices, faq, features, audiences, process } =
-      SpeakLogData;
+  async function init() {
+    const { site, pricing, pricingEvent, faq, features, audiences, process } = SpeakLogData;
 
     setKakaoLinks(site.kakaoUrl);
     setContactInfo(site);
+    populateLearnerTypeSelects();
     renderFeatures(features);
     renderAudience(audiences);
     renderProcess(process);
     renderPricingEvent(pricingEvent);
     renderPricing(pricing);
-    renderReviews(reviews);
-    renderNotices(notices);
     renderFaq(faq);
-    initReviewForm(reviews);
+    initReviewForm();
     initNavigation();
     initStickyCta();
     initContactForm();
     initScrollReveal();
+
+    let reviews = [];
+    let notices = [];
+
+    if (SpeakLogSupabase.isConfigured()) {
+      try {
+        [reviews, notices] = await Promise.all([
+          SpeakLogReviews.loadReviews(),
+          SpeakLogAPI.fetchNotices(),
+        ]);
+      } catch (err) {
+        console.error("[SpeakLog] 데이터 불러오기 실패:", err);
+      }
+    }
+
+    renderReviews(reviews);
+    renderNotices(notices);
   }
 
   if (document.readyState === "loading") {
