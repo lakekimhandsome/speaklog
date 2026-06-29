@@ -118,7 +118,9 @@
         ${plan.badge ? `<span class="pricing-badge">${plan.badge}</span>` : ""}
         <p class="pricing-frequency">${plan.frequency}</p>
         <p class="pricing-price">
-          <span class="pricing-amount">${plan.priceLabel}</span>
+          <span class="pricing-regular">${plan.priceLabel}</span>
+          <span class="pricing-sale-label">첫 달 파격 세일</span>
+          <span class="pricing-amount">${plan.salePriceLabel}</span>
           <span class="pricing-period">/ ${plan.period}</span>
         </p>
         <p class="pricing-desc">${plan.description}</p>

@@ -515,6 +515,24 @@ img { max-width: 100%; display: block; height: auto; }
 .pricing-frequency { font-size: 1.1rem; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; margin-top: 8px; }
 .pricing-price { margin-bottom: 12px; }
 
+.pricing-regular {
+  display: block;
+  font-size: 1rem;
+  color: var(--text-light);
+  text-decoration: line-through;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.pricing-sale-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--pink);
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
 .pricing-amount {
   font-family: var(--font-display);
   font-size: 2.5rem;
