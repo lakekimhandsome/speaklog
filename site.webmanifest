@@ -1,0 +1,19 @@
+{
+  "name": "SpeakLog | 1:1 온라인 영어회화",
+  "short_name": "SpeakLog",
+  "description": "검증된 필리핀 영어 강사와 함께하는 1:1 온라인 영어회화 서비스",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1b3a6b",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
