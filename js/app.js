@@ -34,8 +34,11 @@
     const phoneDisplay = $("#contact-phone-display");
     const hours = $("#contact-hours");
     const instagramBtn = $("#contact-instagram-btn");
+    const footerPhoneBtn = $("#footer-phone-btn");
 
-    if (phoneBtn) phoneBtn.href = `tel:${site.phone.replace(/-/g, "")}`;
+    const tel = `tel:${site.phone.replace(/-/g, "")}`;
+    if (phoneBtn) phoneBtn.href = tel;
+    if (footerPhoneBtn) footerPhoneBtn.href = tel;
     if (phoneDisplay) phoneDisplay.textContent = site.phoneDisplay;
     if (hours) hours.textContent = site.businessHours;
     if (instagramBtn) instagramBtn.href = site.instagramUrl;
