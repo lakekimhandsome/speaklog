@@ -163,9 +163,25 @@ a { color: inherit; text-decoration: none; }
   box-shadow: var(--shadow);
 }
 
+.admin-logo-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.admin-logo-link:hover {
+  opacity: 0.85;
+}
+
+.admin-logo-link--login {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 24px;
+}
+
 .login-logo {
   display: block;
-  margin: 0 auto 24px;
   height: 42px;
   width: auto;
   object-fit: contain;
